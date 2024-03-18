@@ -7,11 +7,12 @@ const spinner = document.getElementById('spinner')
 
 // all product
 let allProducts = []
-const url = "https://dummyjson.com/product";
+const url = "https://dummyjson.com/products";
 
 
 
-const fetchPoroducts = async () => {
+const fetchPoroducts = async (selected) => {
+    console.log(selected);
     spinner.classList.remove("hidden")
     // string
     // object
@@ -20,7 +21,7 @@ const fetchPoroducts = async () => {
     // patch
     // delete
     try {
-        const resp = await fetch(url)
+        const resp = await fetch(selected==="all" ? url :`${url}/category/${selected}`)
         const data = await resp.json()
         allProducts = [...data.products]
         showProducts(allProducts)
@@ -37,15 +38,16 @@ const fetchPoroducts = async () => {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    fetchPoroducts()
+    fetchPoroducts("all")
+    fetchCategory()
 })
 
 
 // elements show on display
 function showProducts(data) {
-    // productsContiner.innerHTML = ""
+    productsContiner.innerHTML = ""
     data.map(element => {
-        console.log(element);
+        // console.log(element);
         const product = document.createElement("div")
         product.className = "flex flex-col border dark:border-white/10 border-black/10 transition-all rounded-md overflow-hidden bg-white dark:bg-slate-800"
         product.innerHTML = `
@@ -68,4 +70,54 @@ function showProducts(data) {
     })
 
 }
+
+
+// fetch category
+
+async function fetchCategory() {
+    try {
+        const resp = await fetch(url+"/categories")
+        const data = await resp.json()
+        const category = ["all", ...data]
+        showCategory(category)
+        // console.log(category);
+    } catch (error) {
+
+    }
+}
+
+function showCategory(category) {
+    let res = ""
+    category.map(elem=>{
+        res+=`
+        <option class="text-slate-500 dark:text-slate-400 dark:bg-slate-900" value="${elem}">${elem}</option>
+        `
+    })
+    // console.log(res);
+    selectElements.innerHTML = res
+}
+
+// filtering select
+selectElements.addEventListener("change",()=>{
+    fetchPoroducts(selectElements.value)
+})
+
+// search element
+searching.addEventListener("input",(e)=>{
+
+    let inputValue = e.target.value.toLowerCase()
+    const searchingProducts = allProducts.filter(items=>{
+        // console.log(items);
+        if (items.title.toLowerCase().includes(inputValue)) {
+            return items
+        }
+    })
+    showProducts(searchingProducts)
+})
+
+
+
+
+
+
 
